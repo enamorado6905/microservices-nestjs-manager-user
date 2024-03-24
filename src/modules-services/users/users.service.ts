@@ -24,10 +24,13 @@ export class UsersService implements AbstractMethodOperation<UserDocument> {
     return await this.operationDB.findById(id);
   }
   public async getOne(filter: FilterUserDto): Promise<UserDocument> {
-    return await this.operationDB.findOne(filter);
+    const result = await this.operationDB.findOne(filter);
+    return result ? result[0] : null;
   }
-  public async create(item: CreateUserDto): Promise<UserDocument> {
-    return await this.operationDB.create(item);
+  public async create(
+    item: CreateUserDto,
+  ): Promise<Array<UserDocument> | UserDocument> {
+    return await this.operationDB.create(item as UserDocument);
   }
   public async update(id: string, item: UpdateUserDto): Promise<UserDocument> {
     return await this.operationDB.update(id, item);

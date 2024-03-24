@@ -1,4 +1,4 @@
-import { Model, QueryOptions, SortOrder, UpdateWriteOpResult } from 'mongoose';
+import { Model, QueryOptions, UpdateWriteOpResult } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { PaginationDto } from '../../dto/list/pagination.dto';
 import { PaginationClass } from './pagination.class';
@@ -22,12 +22,8 @@ export class OperationDB<T> {
    * @param options - Optional settings.
    * @returns A promise that resolves to the created document(s).
    */
-  public async create(
-    docs: Array<object> | object,
-    options?: object,
-  ): Promise<T> {
-    const createdData = await this.mongoDbCreate(docs, options);
-    return !createdData ? createdData[0] : createdData[0];
+  public async create(docs: Array<T> | T, options?: object): Promise<T[] | T> {
+    return await this.mongoDbCreate(docs, options);
   }
 
   public async find(
@@ -39,8 +35,8 @@ export class OperationDB<T> {
       paginationDto.page,
       paginationDto.query,
       paginationDto.select,
-      paginationDto.projection,
       paginationDto.sort,
+      paginationDto.populate,
       options,
     );
     const paginated = new PaginationClass(
@@ -95,28 +91,30 @@ export class OperationDB<T> {
     skip: number,
     filter: object,
     select: string | string[] | Record<string, number | boolean | object>,
-    projection: object | string | Array<any>,
-    sort:
-      | string
-      | { [key: string]: SortOrder | { $meta: any } }
-      | [string, SortOrder][]
-      | undefined
-      | null,
+    sort: object,
     populate: {
-      path: string | string[];
+      path?: string | string[];
       select?: string | any;
-      model?: string | Model<T>;
-      match?: any;
-    },
+    } = {},
     options?: object,
   ): Promise<Array<T>> {
-    return await this.service
-      .find(filter, projection, options)
-      .select(select)
-      .sort(sort)
-      .populate(populate.path, populate.select, populate.model, populate.match)
-      .limit(limit)
-      .skip(skip);
+    let query = this.service.find(filter, options);
+
+    if (select) {
+      query = query.select(select);
+    }
+
+    if (sort) {
+      query = query.sort(sort as any);
+    }
+
+    if (populate && populate.path) {
+      query = query.populate(populate.path, populate.select) as any;
+    }
+
+    query = query.limit(limit).skip(skip);
+
+    return await query;
   }
 
   private async mongoDbFindOne(
@@ -163,9 +161,9 @@ export class OperationDB<T> {
   }
 
   private async mongoDbCreate(
-    docs: Array<object> | object,
+    docs: T | T[],
     options?: object,
-  ): Promise<Array<T>> {
+  ): Promise<T[] | T> {
     return await this.service.create(docs, options);
   }
 

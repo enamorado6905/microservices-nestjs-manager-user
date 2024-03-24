@@ -1,5 +1,4 @@
 import { IsBoolean, IsNumber, IsOptional } from 'class-validator';
-import { SortOrder } from 'mongoose';
 
 /**
  * Represents the pagination arguments for retrieving a list of items.
@@ -17,21 +16,13 @@ export class PaginationDto {
   readonly query?: object;
 
   @IsOptional()
-  readonly projection?: object;
+  readonly select?: string;
 
   @IsOptional()
-  readonly sort?:
-    | string
-    | { [key: string]: SortOrder | { $meta: any } }
-    | [string, SortOrder][]
-    | undefined
-    | null;
+  readonly sort?: object;
 
   @IsOptional()
-  readonly select?: Array<string> | string = [];
-
-  @IsOptional()
-  readonly paginated?: string;
+  readonly populate?: object;
 
   /**
    * Indicates whether pagination is enabled.

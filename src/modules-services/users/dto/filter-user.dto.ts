@@ -15,7 +15,7 @@ export class FilterUserDto {
   @IsOptional()
   @IsString()
   @MaxLength(255)
-  readonly username?: string;
+  readonly surnames?: string;
 
   @IsOptional()
   @IsString()
