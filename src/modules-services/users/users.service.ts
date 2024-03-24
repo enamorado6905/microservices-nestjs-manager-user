@@ -1,30 +1,41 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserDocument } from './entities/user.entity';
+import { OperationDB } from '../../common/util/class/operation-db.class';
+import { PaginationDto } from '../../common/dto/list/pagination.dto';
+import { PaginateInterface } from '../../common/interfaces/paginated.interface';
+import { AbstractMethodOperation } from '../../common/util/class/abstract-method-operation.class';
+import { FilterUserDto } from './dto/filter-user.dto';
+import { UserDataBaseEnum } from '../../common/enum/data-base/user-data-base.enum';
 
 @Injectable()
-export class UsersService {
-  public create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+export class UsersService implements AbstractMethodOperation<UserDocument> {
+  constructor(
+    @Inject(UserDataBaseEnum.MODEL)
+    private operationDB: OperationDB<UserDocument>,
+  ) {}
+  public async find(
+    paginationArgsDto: PaginationDto,
+  ): Promise<PaginateInterface<UserDocument>> {
+    return await this.operationDB.find(paginationArgsDto);
   }
-
-  public findAll() {
-    return `This action returns all users`;
+  public async getById(id: string | number): Promise<UserDocument> {
+    return await this.operationDB.findById(id);
   }
-
-  public findOne(id: number) {
-    return `This action returns a #${id} user`;
+  public async getOne(filter: FilterUserDto): Promise<UserDocument> {
+    return await this.operationDB.findOne(filter);
   }
-
-  public findById(id: number) {
-    return `This action returns a #${id} user`;
+  public async create(item: CreateUserDto): Promise<UserDocument> {
+    return await this.operationDB.create(item);
   }
-
-  public update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  public async update(id: string, item: UpdateUserDto): Promise<UserDocument> {
+    return await this.operationDB.update(id, item);
   }
-
-  public remove(id: number) {
-    return `This action removes a #${id} user`;
+  public async delete(id: number | string): Promise<UserDocument> {
+    return await this.operationDB.delete(id);
+  }
+  public async total(): Promise<number> {
+    return await this.operationDB.count();
   }
 }

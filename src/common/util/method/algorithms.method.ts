@@ -1,7 +1,7 @@
 import { join } from 'path';
-import { PaginateInterface } from '../../interfaces/paginated.interface';
 import { writeFile } from 'fs/promises';
 import bcrypt from 'bcrypt';
+
 /**
  * Writes HTTP log data to a file.
  * @param data - The data to be logged.
@@ -23,26 +23,6 @@ export async function writeHttpLog(data: Record<string, any>) {
  */
 export function arrayCheckElement(element: any, array: Array<any>): boolean {
   return array.includes(element);
-}
-
-/**
- * Generates a paginated response object.
- * @param total - The total number of items.
- * @param perPage - The number of items per page.
- * @param page - The current page number.
- * @returns A `PaginateInterface` object representing the paginated response.
- */
-export async function paginated(
-  total: number,
-  perPage: number,
-  page: number,
-): Promise<PaginateInterface<any>> {
-  const [_total, _perPage, _page] = await Promise.all([
-    total ? total : 0,
-    perPage ? perPage : 10,
-    page <= 0 ? 0 : page,
-  ]);
-  return { total: _total, perPage: _perPage, page: _page, nodes: [] };
 }
 
 /**

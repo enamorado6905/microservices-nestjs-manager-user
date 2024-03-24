@@ -1,32 +1,26 @@
 import {
   IsBoolean,
   IsEmail,
-  IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
 
-export class CreateUserDto {
-  @IsNotEmpty()
+export class FilterUserDto {
+  @IsOptional()
   @MaxLength(255)
   @IsString()
-  readonly name: string;
+  readonly name?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   @MaxLength(255)
-  readonly username: string;
+  readonly username?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   @IsEmail()
-  readonly email: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(255)
-  readonly password: string;
+  readonly email?: string;
 
   @IsOptional()
   @IsBoolean()
@@ -34,9 +28,9 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsBoolean()
-  readonly isDisabled: boolean;
+  readonly isDisabled?: boolean;
 
   @IsOptional()
   @IsBoolean()
-  readonly isVerified: boolean;
+  readonly isVerified?: boolean;
 }

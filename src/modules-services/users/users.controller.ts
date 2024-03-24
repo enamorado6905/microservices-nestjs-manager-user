@@ -4,6 +4,8 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersMsgEnum } from '../../common/enum/msg/users.enum';
+import { PaginationDto } from '../../common/dto/list/pagination.dto';
+import { FilterUserDto } from './dto/filter-user.dto';
 
 @Controller()
 export class UsersController {
@@ -15,27 +17,32 @@ export class UsersController {
   }
 
   @MessagePattern(UsersMsgEnum.FIND)
-  public async findAll() {
-    return this.usersService.findAll();
+  public async findAll(@Payload() paginationDto: PaginationDto) {
+    return this.usersService.find(paginationDto);
   }
 
   @MessagePattern(UsersMsgEnum.FIND_ONE)
-  public async findOne(@Payload() id: number) {
-    return this.usersService.findOne(id);
+  public async findOne(@Payload() filter: FilterUserDto) {
+    return this.usersService.getOne(filter);
   }
 
   @MessagePattern(UsersMsgEnum.FIND_BY_ID)
   public async findById(@Payload() id: number) {
-    return this.usersService.findById(id);
+    return this.usersService.getById(id);
   }
 
   @MessagePattern(UsersMsgEnum.UPDATE)
   public async update(@Payload() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(updateUserDto.id, updateUserDto);
+    return this.usersService.update(updateUserDto._id, updateUserDto);
   }
 
   @MessagePattern(UsersMsgEnum.DELETE)
-  public async remove(@Payload() id: number) {
-    return this.usersService.remove(id);
+  public async remove(@Payload() id: number | string) {
+    return this.usersService.delete(id);
+  }
+
+  @MessagePattern(UsersMsgEnum.TOTAL)
+  public async totalUser(): Promise<number> {
+    return await this.usersService.total();
   }
 }

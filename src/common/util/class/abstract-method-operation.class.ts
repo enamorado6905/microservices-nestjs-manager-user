@@ -1,4 +1,4 @@
-import { PaginationArgsDto } from '../../dto/args/pagination.args.dto';
+import { PaginationDto } from '../../dto/list/pagination.dto';
 import { PaginateInterface } from '../../interfaces/paginated.interface';
 
 /**
@@ -18,7 +18,7 @@ export abstract class AbstractMethodOperation<T> {
    * @returns A Promise containing an array of all instances of type T.
    */
   abstract find(
-    paginationArgsDto: PaginationArgsDto,
+    paginationArgsDto: PaginationDto,
   ): Promise<PaginateInterface<T>>;
 
   /**
@@ -43,7 +43,7 @@ export abstract class AbstractMethodOperation<T> {
    * @param item The instance of type T to be created.
    * @returns A Promise containing the newly created instance of type T.
    */
-  abstract create(item: T): Promise<T>;
+  abstract create(item: object): Promise<T>;
 
   /**
    * Abstract method to update an existing instance of type T by its identifier.
@@ -52,7 +52,7 @@ export abstract class AbstractMethodOperation<T> {
    * @param item The updated data for the instance of type T.
    * @returns A Promise containing the updated instance of type T.
    */
-  abstract update(item: T): Promise<T>;
+  abstract update(id: string, item: object): Promise<T>;
 
   /**
    * Abstract method to delete an existing instance of type T by its identifier.

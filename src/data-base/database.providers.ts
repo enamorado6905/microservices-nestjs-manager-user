@@ -3,7 +3,7 @@ import { DataBaseEnum } from '../common/enum/data-base/data-base.enum';
 
 export const databaseProviders = [
   {
-    provide: DataBaseEnum.model,
+    provide: DataBaseEnum.MODEL,
     useFactory: async (): Promise<typeof mongoose> =>
       await mongoose.connect(process.env['DATABASE_MONGODB_URI']),
   },

@@ -1,3 +1,3 @@
 export enum DataBaseEnum {
-  model = 'DATABASE_CONNECTION',
+  MODEL = 'USER_OPERATION_DB',
 }
