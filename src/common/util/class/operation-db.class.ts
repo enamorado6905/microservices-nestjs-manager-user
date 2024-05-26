@@ -4,6 +4,9 @@ import { PaginationDto } from '../../dto/list/pagination.dto';
 import { PaginationClass } from './pagination.class';
 import { PaginateInterface } from '../../interfaces/paginated.interface';
 import { DeleteGroupsResult } from '@nestjs/microservices/external/kafka.interface';
+import { ExceptionClass } from './exception.class';
+import { status } from '@grpc/grpc-js';
+import { rpcExceptionNoDataFound } from '../../errors/exception-errors';
 
 /**
  * @Injectable() marks the class as a provider that can be managed by Nest IoC container.
@@ -50,6 +53,14 @@ export class OperationDB<T> {
 
   public async findById(id: string | number): Promise<T | null> {
     const foundData = await this.mongoDbFindById(id);
+
+    if (!foundData) {
+      const error = new ExceptionClass(
+        status.NOT_FOUND,
+        rpcExceptionNoDataFound(id),
+      );
+      throw error.rpcException();
+    }
     return foundData;
   }
 

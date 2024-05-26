@@ -27,9 +27,9 @@ export class PaginationClass<T> {
     const prevPage = this.page > 1 ? this.page - 1 : null;
     const hasNextPage = nextPage !== null;
     const hasPrevPage = prevPage !== null;
-
     return {
       totalDocs: this.totalDocument,
+      totalPages,
       docs,
       limit: this.limit,
       page: this.page,
@@ -37,7 +37,6 @@ export class PaginationClass<T> {
       prevPage,
       hasNextPage,
       hasPrevPage,
-      totalPages,
       pagingCounter: skip + 1,
       meta: {},
     };

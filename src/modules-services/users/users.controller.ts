@@ -6,6 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersMsgEnum } from '../../common/enum/msg/users.enum';
 import { PaginationDto } from '../../common/dto/list/pagination.dto';
 import { FilterUserDto } from './dto/filter-user.dto';
+import { FilterByIdUserDto } from './dto/filter-by-id.dto';
 
 @Controller()
 export class UsersController {
@@ -27,8 +28,8 @@ export class UsersController {
   }
 
   @MessagePattern(UsersMsgEnum.FIND_BY_ID)
-  public async findById(@Payload() id: number) {
-    return this.usersService.getById(id);
+  public async findById(@Payload() filterByIdUserInput: FilterByIdUserDto) {
+    return this.usersService.getById(filterByIdUserInput.id);
   }
 
   @MessagePattern(UsersMsgEnum.UPDATE)
