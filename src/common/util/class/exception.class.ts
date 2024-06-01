@@ -18,7 +18,7 @@ export class ExceptionClass {
     const details = {
       code: this.status,
       message: this.message,
-      domin: 'xapis.com',
+      extensions: this.extensions,
     };
     throw new RpcException({
       message: JSON.stringify(details),

@@ -1,5 +1,13 @@
 import { ObjectId } from 'mongoose';
 
+export function rpcException(id: string | number | ObjectId) {
+  return `No data found for id: ${id}`;
+}
+
+export function rpcExceptionUnauthorized() {
+  return `Unauthorized`;
+}
+
 export function rpcExceptionNoDataFound(id: string | number | ObjectId) {
   return `No data found for id: ${id}`;
 }
