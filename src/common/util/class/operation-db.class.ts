@@ -4,14 +4,13 @@ import { PaginationDto } from '../../dto/list/pagination.dto';
 import { PaginationClass } from './pagination.class';
 import { PaginateInterface } from '../../interfaces/paginated.interface';
 import { DeleteGroupsResult } from '@nestjs/microservices/external/kafka.interface';
-import { ExceptionClass } from './exception.class';
 import { status } from '@grpc/grpc-js';
 import {
   rpcExceptionCreatedData,
-  rpcExceptionFindData,
   rpcExceptionFindOne,
   rpcExceptionNoDataFound,
 } from '../../errors/exception-errors';
+import { RpcException } from '@nestjs/microservices';
 
 /**
  * @Injectable() marks the class as a provider that can be managed by Nest IoC container.
@@ -42,15 +41,16 @@ export class OperationDB<T> {
    * create({ name: 'doc1' }) // returns { name: 'doc1' }
    */
   public async create(docs: Array<T> | T, options?: object): Promise<T[] | T> {
-    try {
-      return await this.mongoDbCreate(docs, options);
-    } catch (error) {
-      const exception = new ExceptionClass(
-        status.INVALID_ARGUMENT,
-        rpcExceptionCreatedData(),
-      );
-      throw exception.rpcException();
+    const item = await this.mongoDbCreate(docs, options);
+
+    if (!item) {
+      throw new RpcException({
+        message: rpcExceptionCreatedData(),
+        code: status.INVALID_ARGUMENT,
+      });
     }
+
+    return item;
   }
 
   /**
@@ -71,30 +71,22 @@ export class OperationDB<T> {
     paginationDto: PaginationDto,
     options?: any,
   ): Promise<PaginateInterface<T>> {
-    try {
-      const data = await this.mongoDbFind(
-        paginationDto.limit,
-        paginationDto.page,
-        paginationDto.query,
-        paginationDto.select,
-        paginationDto.sort,
-        paginationDto.populate,
-        options,
-      );
-      const paginated = new PaginationClass(
-        paginationDto.page,
-        paginationDto.limit,
-        data,
-        await this.mongoDbCount(),
-      );
-      return paginated.paginated();
-    } catch (error) {
-      const exception = new ExceptionClass(
-        status.NOT_FOUND,
-        rpcExceptionFindData(),
-      );
-      throw exception.rpcException();
-    }
+    const data = await this.mongoDbFind(
+      paginationDto.limit,
+      paginationDto.page,
+      paginationDto.query,
+      paginationDto.select,
+      paginationDto.sort,
+      paginationDto.populate,
+      options,
+    );
+    const paginated = new PaginationClass(
+      paginationDto.page,
+      paginationDto.limit,
+      data,
+      await this.mongoDbCount(),
+    );
+    return paginated.paginated();
   }
 
   /**
@@ -112,31 +104,28 @@ export class OperationDB<T> {
    * findById(123) // returns document with ID 123
    */
   public async findById(id: string | number): Promise<T | null> {
-    try {
-      // find item for id
-      const foundData = await this.mongoDbFindById(id);
+    // find item for id
+    const item = await this.mongoDbFindById(id);
 
-      // Check if found item exists
-      if (!foundData) {
-        throw new Error();
-      }
-
-      // return item
-      return foundData;
-    } catch (error) {
-      const exception = new ExceptionClass(
-        status.NOT_FOUND,
-        rpcExceptionNoDataFound(id),
-      );
-      throw exception.rpcException();
+    // Check if found item exists
+    if (!item) {
+      throw new RpcException({
+        message: JSON.stringify({
+          message: rpcExceptionNoDataFound(id),
+          code: status.NOT_FOUND,
+        }),
+      });
     }
+
+    // return item
+    return item;
   }
 
   /**
    * Finds the first document in the MongoDB collection represented by the service that matches the provided query.
    * This function takes a query object and returns the first document that matches the query.
    *
-   * @param {object} query The MongoDB query to execute.
+   * @param {object} filter The MongoDB query to execute.
    * @returns {Promise<T | null>} The first document matching the query, or null if no document was found.
    *
    * @description The function retrieves a document based on the provided query.
@@ -146,29 +135,26 @@ export class OperationDB<T> {
    * findOne({ name: 'doc1' }) // returns the first document with name 'doc1'
    */
   public async findOne(filter: object): Promise<T | null> {
-    try {
-      const foundData = await this.mongoDbFindOne(filter);
+    const item = await this.mongoDbFindOne(filter);
 
-      if (foundData) {
-        throw new Error();
-      }
-
-      return foundData;
-    } catch (error) {
-      const exception = new ExceptionClass(
-        status.NOT_FOUND,
-        rpcExceptionFindOne(),
-      );
-      throw exception.rpcException();
+    if (!item) {
+      throw new RpcException({
+        message: JSON.stringify({
+          message: rpcExceptionFindOne(),
+          code: status.NOT_FOUND,
+        }),
+      });
     }
+
+    return item;
   }
 
   /**
    * Updates documents in the MongoDB collection represented by the service that match the provided filter.
    * This function takes a filter object and an update object as inputs.
    *
-   * @param {object} filter The filter used to select the documents to update.
-   * @param {object} update The modifications to apply.
+   * @param {object} id The filter used to select the documents to update.
+   * @param {object} data The modifications to apply.
    * @returns {Promise<UpdateWriteOpResult>} The result of the update operation.
    *
    * @description The function updates documents in the MongoDB collection that match the provided filter.
@@ -178,22 +164,20 @@ export class OperationDB<T> {
    * update({ name: 'doc1' }, { $set: { name: 'doc2' } }) // updates the name of all documents with name 'doc1' to 'doc2'
    */
   public async update(id: string, data: Partial<T>): Promise<T | null> {
-    try {
-      const item = await this.mongoDbFindByIdAndUpdate(id, data, {
-        new: true,
-      });
+    const item = await this.mongoDbFindByIdAndUpdate(id, data, {
+      new: true,
+    });
 
-      if (item) {
-        throw new Error();
-      }
-      return item;
-    } catch (error) {
-      const exception = new ExceptionClass(
-        status.INVALID_ARGUMENT,
-        rpcExceptionFindOne(),
-      );
-      throw exception.rpcException();
+    if (!item) {
+      throw new RpcException({
+        message: JSON.stringify({
+          message: rpcExceptionFindOne(),
+          code: status.INVALID_ARGUMENT,
+        }),
+      });
     }
+
+    return item;
   }
 
   /**
@@ -201,7 +185,7 @@ export class OperationDB<T> {
    * This function takes a filter object and an update object as inputs.
    *
    * @param {object} filter The filter used to select the document to update.
-   * @param {object} update The modifications to apply.
+   * @param {object} data The modifications to apply.
    * @returns {Promise<UpdateWriteOpResult>} The result of the update operation.
    *
    * @description The function updates a single document in the MongoDB collection that matches the provided filter.
@@ -214,23 +198,20 @@ export class OperationDB<T> {
     filter: object,
     data: Partial<T>,
   ): Promise<UpdateWriteOpResult> {
-    try {
-      const item = await this.mongoDbUpdateOne(filter, data, {
-        new: true,
+    const item = await this.mongoDbUpdateOne(filter, data, {
+      new: true,
+    });
+
+    if (!item) {
+      throw new RpcException({
+        message: JSON.stringify({
+          message: rpcExceptionFindOne(),
+          code: status.INVALID_ARGUMENT,
+        }),
       });
-
-      if (item) {
-        throw new Error();
-      }
-
-      return item;
-    } catch (error) {
-      const exception = new ExceptionClass(
-        status.INVALID_ARGUMENT,
-        rpcExceptionFindOne(),
-      );
-      throw exception.rpcException();
     }
+
+    return item;
   }
 
   /**
@@ -247,19 +228,17 @@ export class OperationDB<T> {
    * delete('1234abcd') // deletes the document with ID '1234abcd'
    */
   public async delete(id: number | string): Promise<T | null> {
-    try {
-      const item = await this.mongoDbFindByIdAndDelete(id);
-      if (item) {
-        throw new Error();
-      }
-      return item;
-    } catch (error) {
-      const exception = new ExceptionClass(
-        status.INVALID_ARGUMENT,
-        rpcExceptionFindOne(),
-      );
-      throw exception.rpcException();
+    const item = await this.mongoDbFindByIdAndDelete(id);
+    if (!item) {
+      throw new RpcException({
+        message: JSON.stringify({
+          message: rpcExceptionFindOne(),
+          code: status.INVALID_ARGUMENT,
+        }),
+      });
     }
+
+    return item;
   }
 
   /**
@@ -276,15 +255,18 @@ export class OperationDB<T> {
    * deleteOne({ name: 'doc1' }) // deletes the first document with name 'doc1'
    */
   public async deleteOne(filter: object): Promise<DeleteGroupsResult> {
-    try {
-      return await this.mongoDbRemoveOne(filter);
-    } catch (error) {
-      const exception = new ExceptionClass(
-        status.INVALID_ARGUMENT,
-        rpcExceptionFindOne(),
-      );
-      throw exception.rpcException();
+    const item = await this.mongoDbRemoveOne(filter);
+
+    if (!item) {
+      throw new RpcException({
+        message: JSON.stringify({
+          message: rpcExceptionFindOne(),
+          code: status.INVALID_ARGUMENT,
+        }),
+      });
     }
+
+    return item;
   }
 
   /**
@@ -299,15 +281,17 @@ export class OperationDB<T> {
    * count() // returns the number of documents in the collection
    */
   public async count(): Promise<number | null> {
-    try {
-      return await this.mongoDbCount();
-    } catch (error) {
-      const exception = new ExceptionClass(
-        status.INTERNAL,
-        rpcExceptionFindOne(),
-      );
-      throw exception.rpcException();
+    const item = await this.mongoDbCount();
+    if (!item) {
+      throw new RpcException({
+        message: JSON.stringify({
+          message: rpcExceptionFindOne(),
+          code: status.INTERNAL,
+        }),
+      });
     }
+
+    return item;
   }
 
   private async mongoDbFind(

@@ -13,7 +13,7 @@ import { UserDataBaseEnum } from '../../common/enum/data-base/user-data-base.enu
 export class UsersService implements AbstractMethodOperation<UserDocument> {
   constructor(
     @Inject(UserDataBaseEnum.MODEL)
-    private operationDB: OperationDB<UserDocument>,
+    private readonly operationDB: OperationDB<UserDocument>,
   ) {}
   public async find(
     paginationArgsDto: PaginationDto,
@@ -21,7 +21,9 @@ export class UsersService implements AbstractMethodOperation<UserDocument> {
     return await this.operationDB.find(paginationArgsDto);
   }
   public async getById(id: string | number): Promise<UserDocument> {
-    return await this.operationDB.findById(id);
+    const a = await this.operationDB.findById(id);
+    console.log('aaaaaaaaaaaa', a);
+    return a;
   }
   public async getOne(filter: FilterUserDto): Promise<UserDocument> {
     const result = await this.operationDB.findOne(filter);
