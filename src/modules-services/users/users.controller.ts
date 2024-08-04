@@ -33,8 +33,10 @@ export class UsersController {
   }
 
   @MessagePattern(UsersMsgEnum.UPDATE)
-  public async update(@Payload() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(updateUserDto._id, updateUserDto);
+  public async update(
+    @Payload() updateUserDto: { id: string; item: UpdateUserDto },
+  ) {
+    return this.usersService.update(updateUserDto.id, updateUserDto.item);
   }
 
   @MessagePattern(UsersMsgEnum.DELETE)

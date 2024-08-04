@@ -28,6 +28,10 @@ export class CreateUserDto {
   @MaxLength(255)
   readonly password: string;
 
+  @IsNotEmpty()
+  @IsString()
+  readonly language: string;
+
   @IsOptional()
   @IsBoolean()
   readonly isLocked?: boolean;

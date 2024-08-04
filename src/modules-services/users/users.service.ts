@@ -21,9 +21,7 @@ export class UsersService implements AbstractMethodOperation<UserDocument> {
     return await this.operationDB.find(paginationArgsDto);
   }
   public async getById(id: string | number): Promise<UserDocument> {
-    const a = await this.operationDB.findById(id);
-    console.log('aaaaaaaaaaaa', a);
-    return a;
+    return await this.operationDB.findById(id);
   }
   public async getOne(filter: FilterUserDto): Promise<UserDocument> {
     const result = await this.operationDB.findOne(filter);

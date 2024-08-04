@@ -164,7 +164,7 @@ export class OperationDB<T> {
    * update({ name: 'doc1' }, { $set: { name: 'doc2' } }) // updates the name of all documents with name 'doc1' to 'doc2'
    */
   public async update(id: string, data: Partial<T>): Promise<T | null> {
-    const item = await this.mongoDbFindByIdAndUpdate(id, data, {
+    const item = await this.mongoDbFindByIdAndUpdate(id, data, [], {
       new: true,
     });
 
