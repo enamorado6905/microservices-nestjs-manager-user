@@ -1,44 +1,41 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDocument } from './entities/user.entity';
-import { OperationDB } from '../../common/util/class/operation-db.class';
 import { PaginationDto } from '../../common/dto/list/pagination.dto';
 import { PaginateInterface } from '../../common/interfaces/paginated.interface';
 import { AbstractMethodOperation } from '../../common/util/class/abstract-method-operation.class';
 import { FilterUserDto } from './dto/filter-user.dto';
-import { UserDataBaseEnum } from '../../common/enum/data-base/user-data-base.enum';
+import { UsersServiceClass } from '../../common/util/class/service/user.service.class';
 
 @Injectable()
 export class UsersService implements AbstractMethodOperation<UserDocument> {
-  constructor(
-    @Inject(UserDataBaseEnum.MODEL)
-    private readonly operationDB: OperationDB<UserDocument>,
-  ) {}
+  constructor(private readonly usersServiceClass: UsersServiceClass) {}
   public async find(
     paginationArgsDto: PaginationDto,
   ): Promise<PaginateInterface<UserDocument>> {
-    return await this.operationDB.find(paginationArgsDto);
+    return await this.usersServiceClass.find(paginationArgsDto);
   }
+
   public async getById(id: string | number): Promise<UserDocument> {
-    return await this.operationDB.findById(id);
+    return await this.usersServiceClass.getById(id);
   }
   public async getOne(filter: FilterUserDto): Promise<UserDocument> {
-    const result = await this.operationDB.findOne(filter);
-    return result ? result[0] : null;
+    return await this.usersServiceClass.getOne(filter);
   }
   public async create(
     item: CreateUserDto,
   ): Promise<Array<UserDocument> | UserDocument> {
-    return await this.operationDB.create(item as UserDocument);
+    return await this.usersServiceClass.create(item as UserDocument);
   }
   public async update(id: string, item: UpdateUserDto): Promise<UserDocument> {
-    return await this.operationDB.update(id, item);
+    return await this.usersServiceClass.update(id, item);
   }
   public async delete(id: number | string): Promise<UserDocument> {
-    return await this.operationDB.delete(id);
+    return await this.usersServiceClass.delete(id);
   }
+
   public async total(): Promise<number> {
-    return await this.operationDB.count();
+    return await this.usersServiceClass.total();
   }
 }
